@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class Signuppage extends StatefulWidget {
+class SignupPage extends StatefulWidget {
   @override
-  _SignuppageState createState() => _SignuppageState();
+  _SignupPageState createState() => _SignupPageState();
 }
 
-class _SignuppageState extends State<Signuppage> {
+class _SignupPageState extends State<SignupPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String _name, _email, _password;
+
   checkAuthentication() async {
     _auth.onAuthStateChanged.listen((user) {
       if (user != null) {
@@ -19,20 +20,40 @@ class _SignuppageState extends State<Signuppage> {
     });
   }
 
-  navigatToSigninScreen() {
-    Navigator.pushReplacementNamed(context, "/Signinpage");
+  navigateToSigninScreen() {
+    Navigator.pushReplacementNamed(context, "/SigninPage");
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     this.checkAuthentication();
   }
 
+  showError(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(errorMessage),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   signup() async {
-    if (_formkey.currentState.validate()) {
-      _formkey.currentState.save();
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+
       try {
         FirebaseUser user = await _auth.createUserWithEmailAndPassword(
             email: _email, password: _password);
@@ -47,38 +68,20 @@ class _SignuppageState extends State<Signuppage> {
     }
   }
 
-  showError(String errorMessage) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text(errorMessage),
-            actions: [
-              FlatButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("ok"))
-            ],
-          );
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sign up"),
+        title: Text('Sign Up'),
       ),
       body: Container(
         child: Center(
           child: ListView(
-            children: [
+            children: <Widget>[
               Container(
-                padding: EdgeInsets.fromLTRB(10.9, 50.0, 10.0, 50.0),
+                padding: EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 50.0),
                 child: Image(
-                  image: AssetImage("assets/mascot.png"),
+                  image: AssetImage('assets/mascot.png'),
                   width: 100.0,
                   height: 100.0,
                 ),
@@ -86,83 +89,104 @@ class _SignuppageState extends State<Signuppage> {
               Container(
                 padding: EdgeInsets.all(16.0),
                 child: Form(
-                    key: _formkey,
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(top: 20.0),
-                          child: TextFormField(
-                            validator: (input) {
-                              if (input.isEmpty) {
-                                return 'provide a name ';
-                              }
-                            },
-                            decoration: InputDecoration(
-                                labelText: "Name",
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5.0))),
-                            onSaved: (input) => _name = input,
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      // Name
+                      Container(
+                        padding: EdgeInsets.only(top: 20.0),
+                        child: TextFormField(
+                          validator: (input) {
+                            if (input.isEmpty) {
+                              return 'Provide a name';
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
                           ),
+                          onSaved: (input) {
+                            _name = input;
+                          },
                         ),
-                        Container(
-                          padding: EdgeInsets.only(top: 20.0),
-                          child: TextFormField(
-                            validator: (input) {
-                              if (input.isEmpty) {
-                                return 'provide an email';
-                              }
-                            },
-                            decoration: InputDecoration(
-                                labelText: "Email",
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5.0))),
-                            onSaved: (input) => _email = input,
+                      ),
+                      // Email
+                      Container(
+                        padding: EdgeInsets.only(top: 20.0),
+                        child: TextFormField(
+                          validator: (input) {
+                            if (input.isEmpty) {
+                              return 'Provide an email';
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Email',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
                           ),
+                          onSaved: (input) {
+                            _email = input;
+                          },
                         ),
-                        Container(
-                          padding: EdgeInsets.only(top: 20.0),
-                          child: TextFormField(
-                            validator: (input) {
-                              if (input.length < 6) {
-                                return 'password should be 6 char';
-                              }
-                            },
-                            decoration: InputDecoration(
-                                labelText: "Password",
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5.0))),
-                            onSaved: (input) => _password = input,
-                            obscureText: true,
+                      ),
+                      // Password
+                      Container(
+                        padding: EdgeInsets.only(top: 20.0),
+                        child: TextFormField(
+                          validator: (input) {
+                            if (input.length < 6) {
+                              return 'Password should be 6 char atleast';
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
                           ),
+                          onSaved: (input) {
+                            _password = input;
+                          },
+                          obscureText: true,
                         ),
-                        Container(
-                          padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-                          child: RaisedButton(
-                            padding:
-                                EdgeInsets.fromLTRB(100.0, 20.0, 100.0, 20.0),
-                            color: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.0)),
-                            onPressed: signup(),
-                            child: Text(
-                              "Sign In",
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 20.0),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                        child: RaisedButton(
+                          padding:
+                              EdgeInsets.fromLTRB(100.0, 20.0, 100.0, 20.0),
+                          color: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          onPressed: signup,
+                          child: Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
                             ),
                           ),
                         ),
-                        //redirect to signup page
-                        GestureDetector(
-                          onTap: navigatToSigninScreen,
-                          child: Text(
-                            "Create an account?",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 16.0),
+                      ),
+                      // Redirect to signup page
+                      GestureDetector(
+                        onTap: navigateToSigninScreen,
+                        child: Text(
+                          'Already have an account?',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16.0,
                           ),
-                        )
-                      ],
-                    )),
-              )
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
