@@ -8,14 +8,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String displayName;
 
-  FirebaseUser user;
+  FirebaseUser _user;
   bool isSignedIn = false;
 
   checkAuthentication() async {
     _auth.onAuthStateChanged.listen((user) {
       if (user == null) {
-        Navigator.pushReplacementNamed(context, "/Signinpage");
+        Navigator.pushReplacementNamed(context, "/SigninPage");
       }
     });
   }
@@ -27,11 +28,11 @@ class _HomePageState extends State<HomePage> {
 
     if (firebaseUser != null) {
       setState(() {
-        this.user = firebaseUser;
+        this._user = firebaseUser;
         this.isSignedIn = true;
+        this.displayName = _user.displayName;
       });
     }
-    // print(this.user);
   }
 
   signOut() async {
@@ -40,7 +41,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     this.checkAuthentication();
     this.getUser();
@@ -54,43 +54,48 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Container(
         child: Center(
-            child: !isSignedIn
-                ? CircularProgressIndicator()
-                : Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(50),
-                        child: Image(
-                          image: AssetImage("assets/mascot.png"),
-                          width: 100.0,
-                          height: 100.0,
+          child: !isSignedIn
+              ? CircularProgressIndicator()
+              : Column(
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(50.0),
+                      child: Image(
+                        image: AssetImage("assets/mascot.png"),
+                        width: 100.0,
+                        height: 100.0,
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(50.0),
+                      child: Text(
+                        "Hello $displayName, you are logged in as ${_user.email}",
+                        style: TextStyle(
+                          fontSize: 20.0,
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.all(50),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(20.0),
+                      child: RaisedButton(
+                        color: Colors.blue,
+                        padding: EdgeInsets.fromLTRB(100.0, 20.0, 100.0, 20.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        onPressed: signOut,
                         child: Text(
-                          "Hello , ${user.displayName}, you are log in as ${user.email}",
-                          style: TextStyle(fontSize: 20.0),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(20.0),
-                        child: RaisedButton(
-                          color: Colors.blue,
-                          padding:
-                              EdgeInsets.fromLTRB(100.0, 20.0, 100.0, 20.0),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0)),
-                          onPressed: signOut(),
-                          child: Text(
-                            "Signout",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 20.0),
+                          "Sign Out",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20.0,
                           ),
                         ),
-                      )
-                    ],
-                  )),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
